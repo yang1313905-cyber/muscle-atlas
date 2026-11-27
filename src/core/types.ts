@@ -178,8 +178,10 @@ export interface Exercise {
   difficulty: DifficultyLevel;
   mechanics: 'compound' | 'isolation';
   pattern: MovementPattern;
-  /** Linked joint actions explaining WHY this exercise trains the target muscles */
+  /** Linked dynamic/concentric joint actions explaining WHY this exercise trains the target muscles */
   jointActionIds: string[];
+  /** Optional joint movements isometrically resisted (e.g. anti-rotation / anti-lateral-flexion / anti-extension core drills) */
+  resistedJointActionIds?: string[];
   muscles: ExerciseMuscleLink[];
   /** Short, high-value execution cues (1-3 bullets) */
   cues: string[];
