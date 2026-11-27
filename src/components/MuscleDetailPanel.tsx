@@ -24,6 +24,7 @@ import type {
   SimpleGroupId,
 } from '../core/types';
 import { getAllJointActions, getDetailedMuscleById, getSimpleGroupById } from '../core/engine';
+import { ExercisePosePreview } from './ExercisePosePreview';
 
 interface MuscleDetailPanelProps {
   result: MuscleQueryResult;
@@ -127,7 +128,7 @@ export function MuscleDetailPanel({
     result.target.mode === 'detailed' ? result.includedMuscles[0] ?? null : null;
 
   return (
-    <section className="detail-card" aria-label="肌肉详情与推荐动作">
+    <section id="muscle-detail-panel" className="detail-card" aria-label="肌肉详情与推荐动作">
       {/* Hero Summary */}
       <div className="detail-hero">
         <div className="detail-breadcrumb">
@@ -523,12 +524,21 @@ function ExerciseCard({
 
   return (
     <article className={`exercise-card ${isHeatmapActive ? 'is-heatmap-active' : ''}`}>
-      <div className="exercise-card-top">
-        <div>
-          <h4 className="exercise-name">
-            {exercise.nameZh}
-            <span className="exercise-en">{exercise.nameEn}</span>
-          </h4>
+      <div className="exercise-card-grid">
+        <div className="exercise-area-header">
+          <div className="exercise-header-line">
+            <h4 className="exercise-name">
+              {exercise.nameZh}
+              <span className="exercise-en">{exercise.nameEn}</span>
+            </h4>
+            <div className="score-bar-wrap score-mobile-inline" title={`目标肌刺激优先级：${matchedEffectiveness}/100`}>
+              <div className="score-bar">
+                <div className="score-bar-fill" style={{ width: `${matchedEffectiveness}%` }} />
+              </div>
+              <span>{matchedEffectiveness}</span>
+            </div>
+          </div>
+
           <div className="badge-row">
             <span className={`role-badge ${matchedRole}`}>{ROLE_LABEL[matchedRole]}</span>
             <span className="meta-pill">
@@ -549,42 +559,45 @@ function ExerciseCard({
           </div>
         </div>
 
-        <div className="score-bar-wrap" title={`目标肌刺激优先级：${matchedEffectiveness}/100`}>
-          <div className="score-bar">
-            <div className="score-bar-fill" style={{ width: `${matchedEffectiveness}%` }} />
-          </div>
-          <span>{matchedEffectiveness}</span>
-        </div>
-      </div>
+        <p className="exercise-why exercise-area-why">{exercise.whyEffective}</p>
 
-      <p className="exercise-why">{exercise.whyEffective}</p>
-
-      <div className="exercise-actions-bar">
-        <button
-          type="button"
-          className={`card-action-btn ${isHeatmapActive ? 'active' : ''}`}
-          onClick={onToggleHeatmap}
-        >
-          <Flame size={13} />
-          <span>{isHeatmapActive ? '正在体图高亮' : '体图热力预览'}</span>
-        </button>
-
-        <button type="button" className="card-action-btn" onClick={onToggleExpand}>
-          {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-          <span>{expanded ? '收起要点' : '动作要点与避坑'}</span>
-        </button>
-
-        {biliUrl && (
-          <a
-            href={biliUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="card-action-btn"
+        <div className="exercise-actions-bar exercise-area-actions">
+          <button
+            type="button"
+            className={`card-action-btn ${isHeatmapActive ? 'active' : ''}`}
+            onClick={onToggleHeatmap}
           >
-            <ExternalLink size={13} />
-            <span>B站看教学</span>
-          </a>
-        )}
+            <Flame size={13} />
+            <span>{isHeatmapActive ? '正在体图高亮' : '体图热力预览'}</span>
+          </button>
+
+          <button type="button" className="card-action-btn" onClick={onToggleExpand}>
+            {expanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+            <span>{expanded ? '收起要点' : '动作要点与避坑'}</span>
+          </button>
+
+          {biliUrl && (
+            <a
+              href={biliUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="card-action-btn"
+            >
+              <ExternalLink size={13} />
+              <span>B站看教学</span>
+            </a>
+          )}
+        </div>
+
+        <div className="exercise-card-media exercise-area-media">
+          <ExercisePosePreview exerciseId={exercise.id} exerciseNameZh={exercise.nameZh} />
+          <div className="score-bar-wrap score-desktop-rail" title={`目标肌刺激优先级：${matchedEffectiveness}/100`}>
+            <div className="score-bar">
+              <div className="score-bar-fill" style={{ width: `${matchedEffectiveness}%` }} />
+            </div>
+            <span>{matchedEffectiveness}</span>
+          </div>
+        </div>
       </div>
 
       {expanded && (

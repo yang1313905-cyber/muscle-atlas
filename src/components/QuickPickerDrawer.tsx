@@ -36,7 +36,9 @@ export function QuickPickerDrawer({
   onSelectSimple,
   onSelectDetailed,
 }: QuickPickerDrawerProps) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth > 640 : true,
+  );
 
   return (
     <div className="quick-picker">

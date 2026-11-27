@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Flame, RotateCw, ZoomIn, ZoomOut } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { ArrowDown, Flame, RotateCw, ZoomIn, ZoomOut } from 'lucide-react';
 import {
   ANATOMY_LANDMARKS,
   ANATOMY_REGIONS,
@@ -49,6 +49,18 @@ export function BodyMap({
 }: BodyMapProps) {
   const [zoomIdx, setZoomIdx] = useState(0);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [isMobileViewport, setIsMobileViewport] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth <= 640 : false,
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 640px)');
+    const onChange = (e: MediaQueryListEvent) => setIsMobileViewport(e.matches);
+    setIsMobileViewport(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
 
   const groupMap = useMemo(
     () => new Map(simpleGroups.map((g) => [g.id, g])),
@@ -145,8 +157,19 @@ export function BodyMap({
     return { primary, secondary, stabilizer };
   }, [heatmap, muscleMap]);
 
-  const svgWidth = Math.round(290 * zoom);
-  const svgHeight = Math.round(580 * zoom);
+  const baseW = isMobileViewport ? 210 : 290;
+  const baseH = isMobileViewport ? 420 : 580;
+  const svgWidth = Math.round(baseW * zoom);
+  const svgHeight = Math.round(baseH * zoom);
+
+  const selectedLabel =
+    selection.mode === 'simple'
+      ? groupMap.get(selection.id)?.nameZh ?? selection.id
+      : muscleMap.get(selection.id)?.nameZh ?? selection.id;
+
+  const scrollToDetail = () => {
+    document.getElementById('muscle-detail-panel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   return (
     <section className="anatomy-card" aria-label="交互式人体肌肉结构图">
@@ -370,6 +393,13 @@ export function BodyMap({
         </div>
         <span>{mode === 'simple' ? '小白精简模式' : '专业细分模式'}</span>
       </div>
+
+      <button type="button" className="mobile-jump-btn" onClick={scrollToDetail}>
+        <span>当前选中：{selectedLabel}</span>
+        <span className="mobile-jump-action">
+          查看推荐动作 <ArrowDown size={13} />
+        </span>
+      </button>
 
       <QuickPickerDrawer
         mode={mode}
